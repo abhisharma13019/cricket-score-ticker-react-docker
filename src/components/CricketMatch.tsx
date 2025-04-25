@@ -33,7 +33,7 @@ const CricketMatch = () => {
   const fetchMatchData = async () => {
     try {
       setIsRefreshing(true);
-      const response = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=bebbb42b-3078-4930-bd3c-279db4c45c2b&offset=0');
+      const response = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=&offset=0');
       const data = await response.json();
       
       if (data.data) {
