@@ -6,15 +6,15 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 
 interface MatchData {
-  teams: {
-    team1: string;
-    team2: string;
-  };
-  score: {
-    team1: string;
-    team2: string;
-  };
+  id: string;
+  name: string;
   status: string;
+  teams: string[];
+  score: {
+    r: number;
+    w: number;
+    o: number;
+  }[];
 }
 
 const CricketMatch = () => {
@@ -25,20 +25,12 @@ const CricketMatch = () => {
   const fetchMatchData = async () => {
     try {
       setIsLoading(true);
-      // Using a mock API for demonstration
-      const response = await fetch('https://demo.api-cricket.net/live-score');
+      const response = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=bebbb42b-3078-4930-bd3c-279db4c45c2b&offset=0');
       const data = await response.json();
-      setMatchData({
-        teams: {
-          team1: 'India',
-          team2: 'Australia'
-        },
-        score: {
-          team1: '287/4 (45.2)',
-          team2: 'Yet to bat'
-        },
-        status: 'Live - India won the toss and elected to bat'
-      });
+      
+      if (data.data && data.data.length > 0) {
+        setMatchData(data.data[0]); // Taking the first match from the list
+      }
       setIsLoading(false);
     } catch (error) {
       toast({
@@ -94,14 +86,16 @@ const CricketMatch = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-semibold">{matchData.teams.team1}</h3>
-                  <span className="text-lg">{matchData.score.team1}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-semibold">{matchData.teams.team2}</h3>
-                  <span className="text-lg">{matchData.score.team2}</span>
-                </div>
+                {matchData.teams.map((team, index) => (
+                  <div key={team} className="flex justify-between items-center">
+                    <h3 className="text-xl font-semibold">{team}</h3>
+                    <span className="text-lg">
+                      {matchData.score[index] 
+                        ? `${matchData.score[index].r}/${matchData.score[index].w} (${matchData.score[index].o})`
+                        : 'Yet to bat'}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="text-sm text-gray-600 pt-2 border-t">
@@ -115,3 +109,4 @@ const CricketMatch = () => {
 };
 
 export default CricketMatch;
+
