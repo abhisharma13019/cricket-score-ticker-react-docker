@@ -18,7 +18,7 @@ interface MatchData {
 }
 
 const CricketMatch = () => {
-  const [matchData, setMatchData] = React.useState<MatchData | null>(null);
+  const [matches, setMatches] = React.useState<MatchData[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
 
@@ -28,8 +28,8 @@ const CricketMatch = () => {
       const response = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=bebbb42b-3078-4930-bd3c-279db4c45c2b&offset=0');
       const data = await response.json();
       
-      if (data.data && data.data.length > 0) {
-        setMatchData(data.data[0]); // Taking the first match from the list
+      if (data.data) {
+        setMatches(data.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -56,7 +56,7 @@ const CricketMatch = () => {
     return () => clearInterval(interval);
   }, []);
 
-  if (isLoading && !matchData) {
+  if (isLoading && matches.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
         <div className="animate-spin">
@@ -68,9 +68,9 @@ const CricketMatch = () => {
 
   return (
     <div className="p-4">
-      <Card className="max-w-2xl mx-auto p-6">
-        <div className="flex justify-between items-start mb-6">
-          <h2 className="text-2xl font-bold">Live Cricket Score</h2>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Live Cricket Scores</h2>
           <Button
             onClick={fetchMatchData}
             variant="outline"
@@ -82,28 +82,31 @@ const CricketMatch = () => {
           </Button>
         </div>
 
-        {matchData && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                {matchData.teams.map((team, index) => (
-                  <div key={team} className="flex justify-between items-center">
-                    <h3 className="text-xl font-semibold">{team}</h3>
-                    <span className="text-lg">
-                      {matchData.score[index] 
-                        ? `${matchData.score[index].r}/${matchData.score[index].w} (${matchData.score[index].o})`
-                        : 'Yet to bat'}
-                    </span>
-                  </div>
-                ))}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {matches.map((match) => (
+            <Card key={match.id} className="p-6">
+              <div className="space-y-4">
+                <h3 className="font-medium text-sm text-gray-500">{match.name}</h3>
+                <div className="space-y-2">
+                  {match.teams.map((team, index) => (
+                    <div key={team} className="flex justify-between items-center">
+                      <h4 className="text-base font-semibold">{team}</h4>
+                      <span className="text-sm">
+                        {match.score[index] 
+                          ? `${match.score[index].r}/${match.score[index].w} (${match.score[index].o})`
+                          : 'Yet to bat'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-sm text-gray-600 pt-2 border-t">
+                  {match.status}
+                </div>
               </div>
-            </div>
-            <div className="text-sm text-gray-600 pt-2 border-t">
-              {matchData.status}
-            </div>
-          </div>
-        )}
-      </Card>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
