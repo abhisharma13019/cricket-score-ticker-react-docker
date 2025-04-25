@@ -1,9 +1,14 @@
-
 import React, { useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MatchData {
   id: string;
@@ -20,6 +25,7 @@ interface MatchData {
 const CricketMatch = () => {
   const [matches, setMatches] = React.useState<MatchData[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [selectedMatch, setSelectedMatch] = React.useState<MatchData | null>(null);
   const { toast } = useToast();
 
   const fetchMatchData = async () => {
@@ -42,12 +48,10 @@ const CricketMatch = () => {
     }
   };
 
-  // Initial fetch
   useEffect(() => {
     fetchMatchData();
   }, []);
 
-  // Auto refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       fetchMatchData();
@@ -84,7 +88,11 @@ const CricketMatch = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {matches.map((match) => (
-            <Card key={match.id} className="p-6">
+            <Card 
+              key={match.id} 
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => setSelectedMatch(match)}
+            >
               <div className="space-y-4">
                 <h3 className="font-medium text-sm text-gray-500">{match.name}</h3>
                 <div className="space-y-2">
@@ -106,10 +114,52 @@ const CricketMatch = () => {
             </Card>
           ))}
         </div>
+
+        <Dialog open={!!selectedMatch} onOpenChange={() => setSelectedMatch(null)}>
+          <DialogContent className="max-w-3xl">
+            {selectedMatch && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">{selectedMatch.name}</DialogTitle>
+                </DialogHeader>
+                <div className="mt-6 space-y-6">
+                  <div className="grid gap-8">
+                    {selectedMatch.teams.map((team, index) => (
+                      <div key={team} className="space-y-2">
+                        <h3 className="text-xl font-bold">{team}</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          {selectedMatch.score[index] ? (
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Score:</span>
+                                <span className="text-2xl font-bold">
+                                  {selectedMatch.score[index].r}/{selectedMatch.score[index].w}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Overs:</span>
+                                <span className="text-lg">{selectedMatch.score[index].o}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-gray-500">Yet to bat</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 pt-4 border-t">
+                    <h4 className="text-lg font-semibold mb-2">Match Status</h4>
+                    <p className="text-gray-700">{selectedMatch.status}</p>
+                  </div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
 };
 
 export default CricketMatch;
-
