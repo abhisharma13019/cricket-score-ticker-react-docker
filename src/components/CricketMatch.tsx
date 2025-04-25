@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,26 +26,28 @@ interface MatchData {
 const CricketMatch = () => {
   const [matches, setMatches] = React.useState<MatchData[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [selectedMatch, setSelectedMatch] = React.useState<MatchData | null>(null);
   const { toast } = useToast();
 
   const fetchMatchData = async () => {
     try {
-      setIsLoading(true);
+      setIsRefreshing(true);
       const response = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=bebbb42b-3078-4930-bd3c-279db4c45c2b&offset=0');
       const data = await response.json();
       
       if (data.data) {
         setMatches(data.data);
       }
-      setIsLoading(false);
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to fetch match data. Please try again.",
         variant: "destructive"
       });
+    } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -80,9 +83,9 @@ const CricketMatch = () => {
             variant="outline"
             size="icon"
             className="h-8 w-8"
-            disabled={isLoading}
+            disabled={isRefreshing}
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
 
