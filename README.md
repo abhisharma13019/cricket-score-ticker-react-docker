@@ -61,7 +61,7 @@ This project was containerized and deployed using Docker on AWS EC2 for DevOps p
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
 ```bash
 ├── src/
